@@ -35,5 +35,5 @@ func search(queryString string) {
 
 func main() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":443", nil)
 }
