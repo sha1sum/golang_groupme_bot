@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"strings"
+	"os"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
@@ -33,7 +34,14 @@ func search(queryString string) {
 	groupmebot.PostMessage(queryValues["url"][0])
 }
 
+// Get the port that Heroku is running on for the app
+func getPort() string {
+	var port = os.Getenv("PORT")
+	if port == "" { port = "4747" }
+	return ":" + port
+}
+
 func main() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(getPort(), nil)
 }
