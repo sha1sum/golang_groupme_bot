@@ -20,8 +20,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	go search(queryString)
 }
 
+// Take the given search string submitted on GroupMe and get the latest story from Google, posting it with the bot.
 func search(queryString string) {
-	groupmebot.BotID = "754cc09eb0c0bf4f48ad01eba7"
+	groupmebot.BotID = os.Getenv("NEWS_BOT_ID")
 	document, _ := matchers.Retrieve("http://news.google.com/news?q=" + url.QueryEscape(queryString) + "&output=rss")
 	items := document.Channel.Item
 	if len(items) < 1 {
