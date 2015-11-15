@@ -8,9 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 	"os"
+	"fmt"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
+	fmt.Println("Handling request...")
 	decoder := json.NewDecoder(request.Body)
 	var post groupmebot.IncomingMessage
 	decoder.Decode(&post)
@@ -22,16 +24,20 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 
 // Take the given search string submitted on GroupMe and get the latest story from Google, posting it with the bot.
 func search(queryString string) {
+	fmt.Println("Searching for \"" + queryString + "\"")
 	groupmebot.BotID = os.Getenv("NEWS_BOT_ID")
+	fmt.Println("Using bot ID", groupmebot.BotID)
 	document, _ := matchers.Retrieve("http://news.google.com/news?q=" + url.QueryEscape(queryString) + "&output=rss")
 	items := document.Channel.Item
 	if len(items) < 1 {
 		groupmebot.PostMessage("No results for \"" + queryString + "\".")
 		return
 	}
+	fmt.Println("Link retrieved.")
 	firstStoryLink := document.Channel.Item[0].Link
 	link, _ := url.Parse(firstStoryLink)
 	queryValues, _ := url.ParseQuery(link.RawQuery)
+	fmt.Println("Posting", queryValues["url"][0])
 	groupmebot.PostMessage(queryValues["url"][0])
 }
 
@@ -39,10 +45,12 @@ func search(queryString string) {
 func getPort() string {
 	var port = os.Getenv("PORT")
 	if port == "" { port = "4747" }
+	fmt.Println("Using port", port)
 	return ":" + port
 }
 
 func main() {
 	http.HandleFunc("/", handler)
+	fmt.Println("HTTP handler set. Listening.")
 	http.ListenAndServe(getPort(), nil)
 }
