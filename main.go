@@ -42,7 +42,7 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 func search(term string) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
-	groupmebot.BotID = "ed36694c640aa63ecf0edf05b4" // os.Getenv("NEWS_BOT_ID")
+	groupmebot.BotID = os.Getenv("NEWS_BOT_ID")
 	fmt.Println("Using bot ID", groupmebot.BotID+".")
 
 	c := make(chan googlenews.Link, 1)
@@ -61,7 +61,7 @@ func search(term string) {
 func port() string {
 	var port = os.Getenv("PORT")
 	if port == "" {
-		port = "5000"
+		port = "80"
 	}
 	fmt.Println("Using port", port)
 	return ":" + port
