@@ -1,21 +1,34 @@
+/*
+Package groupmebot handles posting a message to a GroupMe bot.
+
+To use the bot functionality, you will need to first set BotID to the ID of the bot you wish to use.
+*/
 package groupmebot
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 )
 
+// BotID is the ID of the GroupMe bot as found on GroupMe's developer site.
 var BotID string
 
-// All we care about in the incoming bot messages are the text of the message
+// IncomingMessage is used to indicate the message properties from the POST sent from a GroupMe bot callback.
 type IncomingMessage struct {
 	Text string `json:"text"`
 }
 
-// Post a message using a GroupMe bot
+// PostMessage posts a string to a GroupMe bot as long as the BotID is present.
 func PostMessage(message string) (*http.Response, error) {
-	messageMap := map[string]string{"bot_id": BotID, "text": message}
-	jsonMap, _ := json.Marshal(messageMap)
-	return http.Post("https://api.groupme.com/v3/bots/post", "application/json", strings.NewReader(string(jsonMap)))
+	if BotID == nil {
+		return nil, errors.New("BotID cannot be nil.")
+	}
+	m := map[string]string{"bot_id": BotID, "text": message}
+	j, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return http.Post("https://api.groupme.com/v3/bots/post", "application/json", strings.NewReader(string(j)))
 }

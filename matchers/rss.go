@@ -10,7 +10,7 @@ import (
 type (
 	// item defines the fields associated with the item tag
 	// in the rss document.
-	item struct {
+	Item struct {
 		XMLName     xml.Name `xml:"item"`
 		PubDate     string   `xml:"pubDate"`
 		Title       string   `xml:"title"`
@@ -43,7 +43,7 @@ type (
 		ManagingEditor string   `xml:"managingEditor"`
 		WebMaster      string   `xml:"webMaster"`
 		Image          image    `xml:"image"`
-		Item           []item   `xml:"item"`
+		Item           []Item   `xml:"item"`
 	}
 
 	// rssDocument defines the fields associated with the rss document.
