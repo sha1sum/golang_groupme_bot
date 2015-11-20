@@ -1,14 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+
 	"github.com/sha1sum/groupme_news_bot/groupmebot"
 	"github.com/sha1sum/groupme_news_bot/matchers"
-	"net/url"
-	"net/http"
-	"encoding/json"
-	"strings"
-	"os"
-	"fmt"
 )
 
 func handler(writer http.ResponseWriter, request *http.Request) {
@@ -16,7 +17,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	var post groupmebot.IncomingMessage
 	decoder.Decode(&post)
-	if strings.ToLower(post.Text[0:6]) != "!news " && strings.ToLower(post.Text[0:7]) != "! news " { return }
+	if strings.ToLower(post.Text[0:6]) != "!news " && strings.ToLower(post.Text[0:7]) != "! news " {
+		return
+	}
 	queryString := strings.Replace(strings.ToLower(post.Text), "!news ", "", 1)
 	queryString = strings.Replace(queryString, "! news ", "", 1)
 	go search(queryString)
@@ -51,7 +54,9 @@ func search(queryString string) {
 // Get the port that Heroku is running on for the app
 func getPort() string {
 	var port = os.Getenv("PORT")
-	if port == "" { port = "4747" }
+	if port == "" {
+		port = "4747"
+	}
 	fmt.Println("Using port", port)
 	return ":" + port
 }
