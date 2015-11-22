@@ -22,8 +22,8 @@ type IncomingMessage struct {
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
 func PostMessage(message string) (*http.Response, error) {
-	if BotID == nil {
-		return nil, errors.New("BotID cannot be nil.")
+	if len(BotID) < 1 {
+		return nil, errors.New("BotID cannot be blank.")
 	}
 	m := map[string]string{"bot_id": BotID, "text": message}
 	j, err := json.Marshal(m)

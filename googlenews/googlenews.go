@@ -11,6 +11,8 @@ import (
 	"github.com/sha1sum/groupme_news_bot/matchers"
 )
 
+// Link is used to house a string URL along with any error that may have resulted from fetching the link from
+// Google News.
 type Link struct {
 	URL string
 	Err error

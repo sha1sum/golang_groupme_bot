@@ -28,7 +28,10 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println("Handling request...")
 	decoder := json.NewDecoder(request.Body)
 	var post groupmebot.IncomingMessage
-	decoder.Decode(&post)
+	err := decoder.Decode(&post)
+	if err != nil {
+		fmt.Println(err)
+	}
 	if strings.ToLower(post.Text[0:6]) != "!news " && strings.ToLower(post.Text[0:7]) != "! news " {
 		return
 	}
@@ -50,10 +53,16 @@ func search(term string) {
 	go googlenews.FirstLink(term, c)
 	link := <-c
 	if link.Err != nil {
-		groupmebot.PostMessage(fmt.Sprint(link.Err))
+		_, err := groupmebot.PostMessage(fmt.Sprint(link.Err))
+		if err != nil {
+			fmt.Println(err)
+		}
 		return
 	}
-	groupmebot.PostMessage(link.URL)
+	_, err := groupmebot.PostMessage(link.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // port determines the port to listen on as declared by the "PORT" environment variable, or uses 80 if the environment
@@ -70,5 +79,8 @@ func port() string {
 func main() {
 	http.HandleFunc("/", handler)
 	fmt.Println("HTTP handler set. Listening.")
-	http.ListenAndServe(port(), nil)
+	err := http.ListenAndServe(port(), nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

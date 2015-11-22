@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	// item defines the fields associated with the item tag
+	// Item defines the fields associated with the item tag
 	// in the rss document.
 	Item struct {
 		XMLName     xml.Name `xml:"item"`
@@ -46,15 +46,15 @@ type (
 		Item           []Item   `xml:"item"`
 	}
 
-	// rssDocument defines the fields associated with the rss document.
-	rssDocument struct {
+	// RSSDocument defines the fields associated with the rss document.
+	RSSDocument struct {
 		XMLName xml.Name `xml:"rss"`
 		Channel channel  `xml:"channel"`
 	}
 )
 
-// retrieve performs a HTTP Get request for the rss feed and decodes the results.
-func Retrieve(feed string) (*rssDocument, error) {
+// Retrieve performs a HTTP Get request for the rss feed and decodes the results.
+func Retrieve(feed string) (*RSSDocument, error) {
 	if feed == "" {
 		return nil, errors.New("No rss feed uri provided")
 	}
@@ -66,7 +66,7 @@ func Retrieve(feed string) (*rssDocument, error) {
 	}
 
 	// Close the response once we return from the function.
-	defer resp.Body.Close()
+	defer closeResponse(resp)
 
 	// Check the status code for a 200 so we know we have received a
 	// proper response.
@@ -76,7 +76,14 @@ func Retrieve(feed string) (*rssDocument, error) {
 
 	// Decode the rss feed document into our struct type.
 	// We don't need to check for errors, the caller can do this.
-	var document rssDocument
+	var document RSSDocument
 	err = xml.NewDecoder(resp.Body).Decode(&document)
 	return &document, err
+}
+
+func closeResponse(resp *http.Response) {
+	err := resp.Body.Close()
+	if err != nil {
+		fmt.Println("Could not close response: ", err)
+	}
 }
