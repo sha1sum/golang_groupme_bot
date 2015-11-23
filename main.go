@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/sha1sum/groupme_news_bot/googlenews"
-	"github.com/sha1sum/groupme_news_bot/groupmebot"
+	"github.com/sha1sum/groupme_news_bot/bot"
 )
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
@@ -27,7 +27,7 @@ import (
 func handler(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println("Handling request...")
 	decoder := json.NewDecoder(request.Body)
-	var post groupmebot.IncomingMessage
+	var post bot.IncomingMessage
 	err := decoder.Decode(&post)
 	if err != nil {
 		fmt.Println(err)
@@ -41,25 +41,25 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 // search takes a given search term and queries Google News for RSS output related to the term, parses the link for the
-// first story returned, then posts the link using groupmebot.PostMessage.
+// first story returned, then posts the link using bot.PostMessage.
 func search(term string) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
-	groupmebot.BotID = os.Getenv("NEWS_BOT_ID")
-	fmt.Println("Using bot ID", groupmebot.BotID+".")
+	bot.BotID = os.Getenv("NEWS_BOT_ID")
+	fmt.Println("Using bot ID", bot.BotID+".")
 
 	c := make(chan googlenews.Link, 1)
 	// Fetch the Google news search results for the search term as an RSS feed
-	go googlenews.FirstLink(term, c)
+	go googlenews.Search(term, c)
 	link := <-c
 	if link.Err != nil {
-		_, err := groupmebot.PostMessage(fmt.Sprint(link.Err))
+		_, err := bot.PostMessage(fmt.Sprint(link.Err))
 		if err != nil {
 			fmt.Println(err)
 		}
 		return
 	}
-	_, err := groupmebot.PostMessage(link.URL)
+	_, err := bot.PostMessage(link.URL)
 	if err != nil {
 		fmt.Println(err)
 	}

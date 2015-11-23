@@ -3,7 +3,7 @@ Package groupmebot handles posting a message to a GroupMe bot.
 
 To use the bot functionality, you will need to first set BotID to the ID of the bot you wish to use.
 */
-package groupmebot
+package bot
 
 import (
 	"encoding/json"

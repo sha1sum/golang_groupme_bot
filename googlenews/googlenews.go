@@ -20,7 +20,7 @@ type Link struct {
 
 // FirstLink takes a search term and queries Google News for results, then parses the first story's raw link from the
 // RSS output returned by Google News.
-func FirstLink(term string, c chan Link) {
+func Search(term string, c chan Link) {
 	// Fetch the Google news search results for the search term as an RSS feed.
 	doc, err := matchers.Retrieve("http://news.google.com/news?q=" + url.QueryEscape(term) + "&output=rss")
 	if err != nil {
