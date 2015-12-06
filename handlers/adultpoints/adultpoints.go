@@ -33,10 +33,17 @@ type (
 	}
 )
 
+var DB string
+
 func (handler Handler) Handle(term string, c chan *bot.OutgoingMessage, message bot.IncomingMessage) {
 	uri := os.Getenv("MONGOLAB_URI")
 	if uri == "" {
 		fmt.Println("no connection string provided")
+		os.Exit(1)
+	}
+	DB = os.Getenv("MONGOLAB_DB")
+	if uri == "" {
+		fmt.Println("no database provided")
 		os.Exit(1)
 	}
 	sess, err := mgo.Dial(uri)
@@ -68,7 +75,7 @@ func pointProcess(term string, sess *mgo.Session, message bot.IncomingMessage) *
 
 func requestPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) *bot.OutgoingMessage {
 	args := strings.Join(words, " ")
-	col := sess.DB("botdb").C("groupmeUsers")
+	col := sess.DB(DB).C("groupmeUsers")
 	var cu user
 	fmt.Println(message.UserID)
 	err := col.Find(bson.M{"userID": message.UserID}).One(&cu)
@@ -101,7 +108,7 @@ func requestPoint(words []string, sess *mgo.Session, message bot.IncomingMessage
 
 func awardPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) *bot.OutgoingMessage {
 	args := strings.Join(words, " ")
-	col := sess.DB("botdb").C("groupmeUsers")
+	col := sess.DB(DB).C("groupmeUsers")
 	var cu user
 	err := col.Find(bson.M{"requests": bson.M{"$elemMatch": bson.M{"reference": args, "approved": false}}}).One(&cu)
 	if err != nil {
@@ -135,7 +142,7 @@ func awardPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) 
 
 func listAdults(sess *mgo.Session) *bot.OutgoingMessage {
 	var results []user
-	_ = sess.DB("botdb").C("groupmeUsers").Find(nil).Sort("-points").All(&results)
+	_ = sess.DB(DB).C("groupmeUsers").Find(nil).Sort("-points").All(&results)
 	board := ""
 	total := 0
 	for _, v := range results {
