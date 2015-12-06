@@ -1,8 +1,11 @@
 {
-	"ImportPath": "github.com/sha1sum/groupme_news_bot",
+	"ImportPath": "github.com/sha1sum/golang_groupme_bot",
 	"GoVersion": "go1.5.1",
-	"Packages": [
-		"./..."
-	],
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2015.10.05-1-g4d04138",
+			"Rev": "4d04138ffef2791c479c0c8bbffc30b34081b8d9"
+		}
+	]
 }
