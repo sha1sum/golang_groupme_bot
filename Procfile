@@ -1,1 +1,1 @@
-web: groupme_news_bot
+web: golang_groupme_bot
