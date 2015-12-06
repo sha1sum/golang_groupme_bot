@@ -18,6 +18,20 @@ var BotID string
 // IncomingMessage is used to indicate the message properties from the POST sent from a GroupMe bot callback.
 type IncomingMessage struct {
 	Text string `json:"text"`
+	Name string `json:"name"`
+	UserID string `json:"user_id"`
+}
+
+// Link is used to house a string URL along with any error that may have resulted from fetching the URL from
+// the resource.
+type OutgoingMessage struct {
+	Message string
+	Err error
+}
+
+// Handler will be used to perform actions and output an OutgoingMessage result to a channel.
+type Handler interface {
+	Handle(term string, c chan *OutgoingMessage, message IncomingMessage)
 }
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.

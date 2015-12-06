@@ -1,13 +1,12 @@
 /*
-GroupMe News Bot will listen to a callback from a GroupMe bot (https://dev.groupme.com/tutorials/bots) and if the text
-of the message starts with "!news" or "! news" then the string following will be used as a search term to fetch the
-most popular news story from Google News using Google News's RSS output, and the story's link will be output back to the
-GroupMe group via the bot.
+Golang GroupMe Bot will listen to a callback from a GroupMe bot (https://dev.groupme.com/tutorials/bots) and if the text
+of the message starts with a recognized trigger then the string following will be used as a search term to fetch the
+results and a message will be output back to the GroupMe group via the bot.
 
 This application also works with Heroku by listening on the port indicated by the "PORT" environment variable. If there is
 no "PORT" environment variable set, then port 80 is used by default to listen for incoming requests.
 
-To use this application, it's necessary to set the "NEWS_BOT_ID" environment variable to the bot ID of the GroupMe bot.
+To use this application, it's necessary to set the "GROUPME_BOT_ID" environment variable to the bot ID of the GroupMe bot.
 */
 package main
 
@@ -18,8 +17,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sha1sum/groupme_news_bot/googlenews"
-	"github.com/sha1sum/groupme_news_bot/bot"
+	"github.com/sha1sum/golang_groupme_bot/handlers/googlenews"
+	"github.com/sha1sum/golang_groupme_bot/bot"
+	"github.com/sha1sum/golang_groupme_bot/handlers/adultpoints"
 )
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
@@ -32,34 +32,38 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if strings.ToLower(post.Text[0:6]) != "!news " && strings.ToLower(post.Text[0:7]) != "! news " {
+	if post.Text[0:1] != "!" { return }
+	var term string
+	if strings.ToLower(post.Text[0:6]) == "!news " || strings.ToLower(post.Text[0:7]) == "! news " {
+		term = strings.Replace(strings.ToLower(post.Text), "!news ", "", 1)
+		term = strings.Replace(term, "! news ", "", 1)
+		go search(term, new(googlenews.Handler), post)
 		return
 	}
-	term := strings.Replace(strings.ToLower(post.Text), "!news ", "", 1)
-	term = strings.Replace(term, "! news ", "", 1)
-	go search(term)
+	term = strings.Trim(post.Text[1:], " ")
+	go search(term, new(adultpoints.Handler), post)
 }
 
-// search takes a given search term and queries Google News for RSS output related to the term, parses the link for the
-// first story returned, then posts the link using bot.PostMessage.
-func search(term string) {
+// search takes a given search term and queries uses the searcher to find the term, and then
+// posts the message returned from the searcher using bot.PostMessage.
+func search(term string, searcher bot.Handler, message bot.IncomingMessage) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
-	bot.BotID = os.Getenv("NEWS_BOT_ID")
+	bot.BotID = os.Getenv("GROUPME_BOT_ID")
 	fmt.Println("Using bot ID", bot.BotID+".")
 
-	c := make(chan googlenews.Link, 1)
+	c := make(chan *bot.OutgoingMessage, 1)
 	// Fetch the Google news search results for the search term as an RSS feed
-	go googlenews.Search(term, c)
-	link := <-c
-	if link.Err != nil {
-		_, err := bot.PostMessage(fmt.Sprint(link.Err))
+	go searcher.Handle(term, c, message)
+	m := <-c
+	if m.Err != nil {
+		_, err := bot.PostMessage(fmt.Sprint(m.Err))
 		if err != nil {
 			fmt.Println(err)
 		}
 		return
 	}
-	_, err := bot.PostMessage(link.URL)
+	_, err := bot.PostMessage(m.Message)
 	if err != nil {
 		fmt.Println(err)
 	}
