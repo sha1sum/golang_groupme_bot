@@ -122,7 +122,7 @@ func awardPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) 
 			break
 		}
 	}
-	if cu.UserID == message.UserID {
+	if cu.UserID == message.UserID || message.SenderType == "bot" {
 		t := "Stop trying to be slick! You can't approve your own requests!"
 		t += " Just for that, I'm revoking the request!"
 		cu.Requests = append(requests[:ri], requests[ri+1:]...)

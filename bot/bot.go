@@ -20,6 +20,7 @@ type IncomingMessage struct {
 	Text string `json:"text"`
 	Name string `json:"name"`
 	UserID string `json:"user_id"`
+	SenderType string `json:"sender_type"`
 }
 
 // Link is used to house a string URL along with any error that may have resulted from fetching the URL from
