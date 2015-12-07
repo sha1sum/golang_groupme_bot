@@ -20,6 +20,7 @@ import (
 	"github.com/sha1sum/golang_groupme_bot/handlers/googlenews"
 	"github.com/sha1sum/golang_groupme_bot/bot"
 	"github.com/sha1sum/golang_groupme_bot/handlers/adultpoints"
+	"time"
 )
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
@@ -50,22 +51,25 @@ func search(term string, searcher bot.Handler, message bot.IncomingMessage) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
 	bot.BotID = os.Getenv("GROUPME_BOT_ID")
-	fmt.Println("Using bot ID", bot.BotID+".")
+	fmt.Println("Using bot ID", bot.BotID + ".")
 
-	c := make(chan *bot.OutgoingMessage, 1)
+	c := make(chan []*bot.OutgoingMessage, 1)
 	// Fetch the Google news search results for the search term as an RSS feed
 	go searcher.Handle(term, c, message)
 	m := <-c
-	if m.Err != nil {
-		_, err := bot.PostMessage(fmt.Sprint(m.Err))
+	for _, v := range m {
+		if v.Err != nil {
+			_, err := bot.PostMessage(fmt.Sprint(v.Err))
+			if err != nil {
+				fmt.Println(err)
+			}
+			return
+		}
+		_, err := bot.PostMessage(v.Message)
 		if err != nil {
 			fmt.Println(err)
 		}
-		return
-	}
-	_, err := bot.PostMessage(m.Message)
-	if err != nil {
-		fmt.Println(err)
+		time.Sleep(time.Second)
 	}
 }
 

@@ -32,7 +32,7 @@ type OutgoingMessage struct {
 
 // Handler will be used to perform actions and output an OutgoingMessage result to a channel.
 type Handler interface {
-	Handle(term string, c chan *OutgoingMessage, message IncomingMessage)
+	Handle(term string, c chan []*OutgoingMessage, message IncomingMessage)
 }
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
