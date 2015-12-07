@@ -17,6 +17,7 @@ type (
 	user struct {
 		ID       bson.ObjectId `bson:"_id"`
 		UserID   string        `bson:"userID"`
+		Created time `bson:"created"`
 		Name     string `bson:"name"`
 		Points   int           `bson:"points"`
 		Requests []request    `bson:"requests"`
@@ -91,7 +92,7 @@ func requestPoint(words []string, sess *mgo.Session, message bot.IncomingMessage
 	fmt.Println(message.UserID)
 	err := col.Find(bson.M{"userID": message.UserID}).One(&cu)
 	if err != nil {
-		col.Insert(user{ID: bson.NewObjectId(), UserID: message.UserID, Name: message.Name, Points: 0})
+		col.Insert(user{ID: bson.NewObjectId(), UserID: message.UserID, Name: message.Name, Points: 0, Created: time.Now()})
 	}
 	_ = col.Find(bson.M{"userID": message.UserID}).One(&cu)
 	requests := cu.Requests
@@ -110,7 +111,7 @@ func requestPoint(words []string, sess *mgo.Session, message bot.IncomingMessage
 
 func determineReference(cu user, sess *mgo.Session) string {
 	var results []user
-	_ = sess.DB(DB).C("groupmeUsers").Find(nil).Sort("userID").All(&results)
+	_ = sess.DB(DB).C("groupmeUsers").Find(nil).Sort("created").All(&results)
 	ui := 0
 	for i, v := range results {
 		if v.UserID == cu.UserID {
@@ -144,7 +145,7 @@ func awardPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) 
 		col.Update(bson.M{"_id": cu.ID}, cu)
 		return []*bot.OutgoingMessage{&bot.OutgoingMessage{Message: t}}
 	}
-	currentlyApproved := len(requests[ri].Approvals) >= len(requests[ri].Rejections)
+	currentlyApproved := len(requests[ri].Approvals) >= len(requests[ri].Rejections) && len(requests[ri].Approvals) != 0
 	for _, v := range requests[ri].Approvals {
 		if v.ApprovedByID == message.UserID {
 			return []*bot.OutgoingMessage{&bot.OutgoingMessage{Message: "You've already approved that request (dumbass)."}}
@@ -222,10 +223,10 @@ func addRejection(col *mgo.Collection, rejectedByID string, cu *user, ri int) {
 
 func announcePointChange(approving bool, col *mgo.Collection, cu *user, req *request, currentlyApproved bool, message bot.IncomingMessage) *bot.OutgoingMessage {
 	switch {
-	case len(req.Approvals) >= len(req.Rejections) && currentlyApproved && len(req.Approvals) == 1 && approving:
+	case len(req.Rejections) == 0 && len(req.Approvals) == 1:
 		cu.Points += 1
 		col.Update(bson.M{"_id": cu.ID}, cu)
-		return &bot.OutgoingMessage{Message: cu.Name + ", you just got your first approval \"" + req.Reason + "\"! You've been given a point (for now)."}
+		return &bot.OutgoingMessage{Message: cu.Name + ", you just got your approval \"" + req.Reason + "\"! You've been given a point (for now)."}
 	case len(req.Approvals) >= len(req.Rejections) && currentlyApproved && !approving:
 		col.Update(bson.M{"_id": cu.ID}, cu)
 		return &bot.OutgoingMessage{Message: cu.Name + ", don't worry about that hater " + message.Name + ". You still have your point \"" + req.Reason + "\"."}
