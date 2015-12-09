@@ -17,10 +17,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sha1sum/golang_groupme_bot/handlers/googlenews"
+	"time"
+
 	"github.com/sha1sum/golang_groupme_bot/bot"
 	"github.com/sha1sum/golang_groupme_bot/handlers/adultpoints"
-	"time"
+	"github.com/sha1sum/golang_groupme_bot/handlers/googlenews"
 )
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
@@ -33,7 +34,9 @@ func handler(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if post.Text[0:1] != "!" { return }
+	if post.Text[0:1] != "!" {
+		return
+	}
 	var term string
 	if strings.ToLower(post.Text[0:6]) == "!news " || strings.ToLower(post.Text[0:7]) == "! news " {
 		term = strings.Replace(strings.ToLower(post.Text), "!news ", "", 1)
@@ -51,7 +54,7 @@ func search(term string, searcher bot.Handler, message bot.IncomingMessage) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
 	bot.BotID = os.Getenv("GROUPME_BOT_ID")
-	fmt.Println("Using bot ID", bot.BotID + ".")
+	fmt.Println("Using bot ID", bot.BotID+".")
 
 	c := make(chan []*bot.OutgoingMessage, 1)
 	// Fetch the Google news search results for the search term as an RSS feed

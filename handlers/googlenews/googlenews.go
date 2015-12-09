@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/sha1sum/golang_groupme_bot/matchers"
 	"github.com/sha1sum/golang_groupme_bot/bot"
+	"github.com/sha1sum/golang_groupme_bot/matchers"
 )
 
 // Searcher will satisfy the bot.Searcher interface.
-type Handler struct {}
+type Handler struct{}
 
 // FirstLink takes a search term and queries Google News for results, then parses the first story's raw link from the
 // RSS output returned by Google News.
