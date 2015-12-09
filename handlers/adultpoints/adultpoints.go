@@ -139,7 +139,7 @@ func awardPoint(words []string, sess *mgo.Session, message bot.IncomingMessage) 
 			break
 		}
 	}
-	if cu.UserID == message.UserID { // TODO: || message.SenderType == "bot" {
+	if cu.UserID == message.UserID || message.SenderType == "bot" {
 		t := "Stop trying to be slick! You can't approve your own requests!"
 		t += " Just for that, I'm revoking the request!"
 		cu.Requests = append(requests[:ri], requests[ri+1:]...)
@@ -189,7 +189,7 @@ func rejectPoint(words []string, sess *mgo.Session, message bot.IncomingMessage)
 		}
 	}
 	previous := [2]int{len(requests[ri].Approvals), len(requests[ri].Rejections)}
-	if cu.UserID == message.UserID { // TODO: || message.SenderType == "bot" {
+	if cu.UserID == message.UserID || message.SenderType == "bot" {
 		t := "Uhhh, okay. If you really want to reject your own request, whatever. Wish granted."
 		addRejection(col, message.UserID, &cu, ri)
 		return []*bot.OutgoingMessage{
