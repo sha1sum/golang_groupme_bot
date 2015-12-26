@@ -70,7 +70,13 @@ type (
 
 	// OutgoingMessage houses a string message along with any error that may have resulted from running a Handler.
 	OutgoingMessage struct {
-		Message string
+		// BotID is the bot being used to post the message
+		BotID string `json:"bot_id"`
+		// Text is the text of the message being posted
+		Text string `json:"text"`
+		// Attachments are an optional array of Attachments being posted to the bot
+		Attachments []Attachment `json:"attachments"`
+		// Err is a possible error being generated while running a Handler
 		Err     error
 	}
 
@@ -81,12 +87,11 @@ type (
 )
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
-func PostMessage(message string) (*http.Response, error) {
-	if len(BotID) < 1 {
+func PostMessage(message OutgoingMessage) (*http.Response, error) {
+	if len(message.BotID) < 1 {
 		return nil, errors.New("BotID cannot be blank.")
 	}
-	m := map[string]string{"bot_id": BotID, "text": message}
-	j, err := json.Marshal(m)
+	j, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
 	}
