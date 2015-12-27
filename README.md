@@ -1,6 +1,6 @@
 ## Golang GroupMe Bot
 
-This project serves as the basis for running an HTTP server that listens for messages on a [GroupMe](https://web.groupme.com/) group and handling running commands and responding to the messages if a given trigger symbols or terms are found within the message.
+This project serves as the basis for running an HTTP server that listens for messages on a [GroupMe](https://web.groupme.com/) group and handling running commands and responding to the messages if given trigger symbols or terms are found within the message.
 
 For more information about GroupMe bots, the [GroupMe bots tutorial](https://dev.groupme.com/tutorials/bots) is a helpful resource.
 
