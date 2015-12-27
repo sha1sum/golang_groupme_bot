@@ -14,7 +14,7 @@ import (
 )
 
 // Commands houses a list of possible bot commands to use when parsing incoming bot messages
-var Commands []Command
+var commands []Command
 
 // Command is a way of indicating a trigger and keyword to determine whether incoming text should be handled by a Handler
 type Command struct {
@@ -93,7 +93,8 @@ func port() string {
 }
 
 // Listen will start an HTTP server and begin listening for bot commands
-func Listen() {
+func Listen(c commands) {
+	commands = c
 	mux := http.NewServeMux()
 	http.Handle("/", handler())
 	fmt.Println("HTTP handler set. Listening.")
