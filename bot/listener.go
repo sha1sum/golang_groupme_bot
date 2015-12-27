@@ -22,54 +22,58 @@ type Command struct {
 	// triggers will be lowercased when matching so are case insensitive.
 	Triggers []string
 	// Handler is the bot handler to use when either of the Triggers are present
-	Handler bot.Handler
+	Handler Handler
 }
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
 // handle function as a goroutine.
-func handler(writer http.ResponseWriter, request *http.Request) {
-	fmt.Println("Handling request...")
-	decoder := json.NewDecoder(request.Body)
-	var post bot.IncomingMessage
-	err := decoder.Decode(&post)
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, c := range Commands {
-		for _, t := range c.Triggers {
-			var term string
+func handler() http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fmt.Println("Handling request...")
+		decoder := json.NewDecoder(request.Body)
+		var post IncomingMessage
+		err := decoder.Decode(&post)
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, c := range Commands {
+			for _, t := range c.Triggers {
+				var term string
 
-			if strings.Contains(strings.ToLower(post.Text), strings.ToLower(t)) {
-				term = strings.Replace(strings.ToLower(post.Text), " " + t + " ", "", -1)
-				term = strings.Replace(term, t + " ", "", -1)
-				term = strings.Replace(term, " " + t, "", -1)
-				go handle(strings.Trim(term, " "), c.Handler, post)
-				c.Handler = reflect.Zero(reflect.TypeOf(c.Handler))
+				if strings.Contains(strings.ToLower(post.Text), strings.ToLower(t)) {
+					term = strings.Replace(strings.ToLower(post.Text), " "+t+" ", "", -1)
+					term = strings.Replace(term, t+" ", "", -1)
+					term = strings.Replace(term, " "+t, "", -1)
+					go handle(strings.Trim(term, " "), c.Handler, post)
+					h := &c
+					v := reflect.ValueOf(h.Handler).Elem()
+					v.Set(reflect.Zero(v.Type()))
+				}
 			}
 		}
-	}
+	})
 }
 
 // search takes a given search term and queries uses the searcher to find the term, and then
-// posts the message returned from the searcher using bot.PostMessage.
-func handle(term string, command bot.Handler, message bot.IncomingMessage) {
+// posts the message returned from the searcher using PostMessage.
+func handle(term string, command Handler, message IncomingMessage) {
 	fmt.Println("Searching for \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
-	bot.BotID = os.Getenv("GROUPME_BOT_ID")
-	fmt.Println("Using bot ID", bot.BotID+".")
+	BotID = os.Getenv("GROUPME_BOT_ID")
+	fmt.Println("Using bot ID", BotID+".")
 
-	c := make(chan []*bot.OutgoingMessage, 1)
+	c := make(chan []*OutgoingMessage, 1)
 	go command.Handle(term, c, message)
 	m := <-c
 	for _, v := range m {
 		if v.Err != nil {
-			_, err := bot.PostMessage(OutgoingMessage{Text: fmt.Sprint(v.Err)})
+			_, err := PostMessage(&OutgoingMessage{Text: fmt.Sprint(v.Err)})
 			if err != nil {
 				fmt.Println(err)
 			}
 			return
 		}
-		_, err := bot.PostMessage(v)
+		_, err := PostMessage(v)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -90,9 +94,10 @@ func port() string {
 
 // Listen will start an HTTP server and begin listening for bot commands
 func Listen() {
-	http.HandleFunc("/", handler)
+	mux := http.NewServeMux()
+	http.Handle("/", handler())
 	fmt.Println("HTTP handler set. Listening.")
-	err := http.ListenAndServe(port(), nil)
+	err := http.ListenAndServe(port(), mux)
 	if err != nil {
 		fmt.Println(err)
 	}

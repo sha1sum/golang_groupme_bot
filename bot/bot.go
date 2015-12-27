@@ -18,30 +18,30 @@ var BotID string
 type (
 	// IncomingMessage is used to indicate the message properties from the POST sent from a GroupMe bot callback.
 	IncomingMessage struct {
-		// Attachments is a list of attachments added on to the GroupMe post
-		Attachments []Attachment `json:"attachments"`
 		// AvatarURL is the address of the avatar used by the poster
 		AvatarURL string `json:"avatar_url"`
-		// CreatedAt is the unix timestamp when the message was posted
-		CreatedAt uint32 `json:"created_at"`
 		// GroupID is the ID of the GroupMe group that the message was posted to
 		GroupID string `json:"group_id"`
 		// ID is the message ID for the post
 		ID string `json:"id"`
 		// Name is the nickname of the person/bot which posted the message
-		Name   string `json:"name"`
+		Name string `json:"name"`
 		// SenderID is a GroupMe internal ID for the sender of the post
 		SenderID string `json:"sender_id"`
 		// SenderType is the type of member sending the post (bot or user)
 		SenderType string `json:"sender_type"`
 		// SenderGUID is a global unique identifier for the poster
 		SenderGUID string `json:"sender_guid"`
-		// System indicates whether GroupMe's server sent the message or whether it was initiated by a poster
-		System bool `json:"system"`
 		// Text is the message text that was posted
-		Text   string `json:"text"`
+		Text string `json:"text"`
 		// UserID is the GroupMe User ID of the person/bot which posted the message
 		UserID string `json:"user_id"`
+		// Attachments is a list of attachments added on to the GroupMe post
+		Attachments []Attachment `json:"attachments"`
+		// CreatedAt is the unix timestamp when the message was posted
+		CreatedAt uint32 `json:"created_at"`
+		// System indicates whether GroupMe's server sent the message or whether it was initiated by a poster
+		System bool `json:"system"`
 	}
 
 	// Attachment is a type of embedded attachment for a GroupMe post
@@ -77,7 +77,7 @@ type (
 		// Attachments are an optional array of Attachments being posted to the bot
 		Attachments []Attachment `json:"attachments"`
 		// Err is a possible error being generated while running a Handler
-		Err     error
+		Err error
 	}
 
 	// Handler will be used to perform actions given an IncomingMessage and output an OutgoingMessage result to a channel.
@@ -87,7 +87,7 @@ type (
 )
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
-func PostMessage(message OutgoingMessage) (*http.Response, error) {
+func PostMessage(message *OutgoingMessage) (*http.Response, error) {
 	if len(message.BotID) < 1 {
 		return nil, errors.New("BotID cannot be blank.")
 	}
