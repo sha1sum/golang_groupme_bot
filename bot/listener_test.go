@@ -3,7 +3,6 @@ package bot
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -32,15 +31,15 @@ func TestHandler(t *testing.T) {
 func TestParsing(t *testing.T) {
 	var m IncomingMessage
 	ex := IncomingMessage{
-		AvatarURL: "http://foo.com/bar.png",
-		GroupID: "1234",
-		ID: "1234",
-		Name: "Foo",
-		SenderID: "1234",
+		AvatarURL:  "http://foo.com/bar.png",
+		GroupID:    "1234",
+		ID:         "1234",
+		Name:       "Foo",
+		SenderID:   "1234",
 		SenderType: "user",
 		SourceGUID: "1234",
-		Text: "@Bar",
-		UserID: "1234",
+		Text:       "@Bar",
+		UserID:     "1234",
 		Attachments: []Attachment{
 			Attachment{
 				Loci: [][2]int{
@@ -53,27 +52,27 @@ func TestParsing(t *testing.T) {
 			},
 			Attachment{
 				Type: "image",
-				URL: "https://foo.com/bar.png",
+				URL:  "https://foo.com/bar.png",
 			},
 			Attachment{
-				Type: "video",
+				Type:       "video",
 				PreviewURL: "https://foo.com/bar.jpg",
-				URL: "https://foo.com/bar.mp4",
+				URL:        "https://foo.com/bar.mp4",
 			},
 			Attachment{
 				Type: "location",
 				Name: "Current Location",
-				Lat: "1.234",
-				Lng: "-1.234",
+				Lat:  "1.234",
+				Lng:  "-1.234",
 			},
 			Attachment{
-				Type: "event",
+				Type:    "event",
 				EventID: "1234",
-				View: "full",
+				View:    "full",
 			},
 		},
 		CreatedAt: 1234,
-		System: false,
+		System:    false,
 	}
 
 	err := json.NewDecoder(strings.NewReader(`{
