@@ -30,8 +30,8 @@ type (
 		SenderID string `json:"sender_id"`
 		// SenderType is the type of member sending the post (bot or user)
 		SenderType string `json:"sender_type"`
-		// SenderGUID is a global unique identifier for the poster
-		SenderGUID string `json:"sender_guid"`
+		// SourceGUID is a global unique identifier for the source of the message
+		SourceGUID string `json:"source_guid"`
 		// Text is the message text that was posted
 		Text string `json:"text"`
 		// UserID is the GroupMe User ID of the person/bot which posted the message

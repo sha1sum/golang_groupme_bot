@@ -57,7 +57,7 @@ func handler() http.Handler {
 // search takes a given search term and queries uses the searcher to find the term, and then
 // posts the message returned from the searcher using PostMessage.
 func handle(term string, command Handler, message IncomingMessage) {
-	fmt.Println("Searching for \"" + term + "\".")
+	fmt.Println("Handling term \"" + term + "\".")
 	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
 	BotID = os.Getenv("GROUPME_BOT_ID")
 	fmt.Println("Using bot ID", BotID+".")
