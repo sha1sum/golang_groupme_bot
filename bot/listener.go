@@ -23,6 +23,8 @@ type Command struct {
 	Triggers []string
 	// Handler is the bot handler to use when either of the Triggers are present
 	Handler Handler
+	// BotID is the ID of the GroupMe bot to use for posting replies to commands
+	BotID string
 }
 
 // handler will take an incoming HTTP request and treat it as a POST request from a GroupMe bot and then fire off the
@@ -44,7 +46,7 @@ func handler() http.Handler {
 					term = strings.Replace(strings.ToLower(post.Text), " "+t+" ", "", -1)
 					term = strings.Replace(term, t+" ", "", -1)
 					term = strings.Replace(term, " "+t, "", -1)
-					go handle(strings.Trim(term, " "), c.Handler, post)
+					go handle(strings.Trim(term, " "), c, post)
 					h := &c
 					v := reflect.ValueOf(h.Handler).Elem()
 					v.Set(reflect.Zero(v.Type()))
@@ -56,24 +58,21 @@ func handler() http.Handler {
 
 // search takes a given search term and queries uses the searcher to find the term, and then
 // posts the message returned from the searcher using PostMessage.
-func handle(term string, command Handler, message IncomingMessage) {
+func handle(term string, command Command, message IncomingMessage) {
 	fmt.Println("Handling term \"" + term + "\".")
-	// Get the "NEWS_BOT_ID" environment variable to use for the BOT ID (we don't want this committed).
-	BotID = os.Getenv("GROUPME_BOT_ID")
-	fmt.Println("Using bot ID", BotID+".")
 
 	c := make(chan []*OutgoingMessage, 1)
-	go command.Handle(term, c, message)
+	go command.Handler.Handle(term, c, message)
 	m := <-c
 	for _, v := range m {
 		if v.Err != nil {
-			_, err := PostMessage(&OutgoingMessage{Text: fmt.Sprint(v.Err)})
+			_, err := PostMessage(&OutgoingMessage{Text: fmt.Sprint(v.Err)}, command.BotID)
 			if err != nil {
 				fmt.Println(err)
 			}
 			return
 		}
-		_, err := PostMessage(v)
+		_, err := PostMessage(v, command.BotID)
 		if err != nil {
 			fmt.Println(err)
 		}

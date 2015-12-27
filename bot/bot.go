@@ -12,9 +12,6 @@ import (
 	"strings"
 )
 
-// BotID is the ID of the GroupMe bot as found on GroupMe's developer site.
-var BotID string
-
 type (
 	// IncomingMessage is used to indicate the message properties from the POST sent from a GroupMe bot callback.
 	IncomingMessage struct {
@@ -87,11 +84,11 @@ type (
 )
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
-func PostMessage(message *OutgoingMessage) (*http.Response, error) {
-	if len(BotID) < 1 {
+func PostMessage(message *OutgoingMessage, botID string) (*http.Response, error) {
+	if len(botID) < 1 {
 		return nil, errors.New("BotID cannot be blank.")
 	}
-	message.BotID = BotID
+	message.BotID = botID
 	j, err := json.Marshal(message)
 	if err != nil {
 		return nil, err
