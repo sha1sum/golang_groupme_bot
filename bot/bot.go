@@ -88,9 +88,10 @@ type (
 
 // PostMessage posts a string to a GroupMe bot as long as the BotID is present.
 func PostMessage(message *OutgoingMessage) (*http.Response, error) {
-	if len(message.BotID) < 1 {
+	if len(BotID) < 1 {
 		return nil, errors.New("BotID cannot be blank.")
 	}
+	message.BotID = BotID
 	j, err := json.Marshal(message)
 	if err != nil {
 		return nil, err

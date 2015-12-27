@@ -36,7 +36,7 @@ func handler() http.Handler {
 		if err != nil {
 			fmt.Println(err)
 		}
-		for _, c := range Commands {
+		for _, c := range commands {
 			for _, t := range c.Triggers {
 				var term string
 
@@ -77,6 +77,7 @@ func handle(term string, command Handler, message IncomingMessage) {
 		if err != nil {
 			fmt.Println(err)
 		}
+		fmt.Printf("Outgoing message: %+v", v)
 		time.Sleep(time.Second)
 	}
 }
@@ -93,10 +94,10 @@ func port() string {
 }
 
 // Listen will start an HTTP server and begin listening for bot commands
-func Listen(c commands) {
+func Listen(c []Command) {
 	commands = c
 	mux := http.NewServeMux()
-	http.Handle("/", handler())
+	mux.Handle("/", handler())
 	fmt.Println("HTTP handler set. Listening.")
 	err := http.ListenAndServe(port(), mux)
 	if err != nil {
